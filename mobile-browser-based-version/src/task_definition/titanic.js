@@ -165,6 +165,7 @@ export const trainingInformation = {
     threshold: 1,
     // choose between 'csv' and 'images'
     dataType: 'csv',
+    fitDataset: false,
 }
 
 

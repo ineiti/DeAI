@@ -2,6 +2,55 @@ import * as tf from "@tensorflow/tfjs";
 import { checkData } from "../helpers/data_validation_script/helpers-image-tasks"
 import { getTopKClasses } from "../helpers/testing_script/testing_script"
 
+export class MnistDataset {
+    constructor(){
+        this.shuffledTrainIndex = 0;
+        this.shuffledTestIndex = 0;
+        this.trainingInformation = trainingInformation;
+        this.image_size = this.trainingInformation.IMAGE_H * this.trainingInformation.IMAGE_W * 3
+        this.num_classes = this.trainingInformation.LABEL_LIST.length
+    }
+
+    nextTrainBatch(batchSize) {
+        return this.nextBatch(
+            batchSize, [this.trainImages, this.trainLabels], () => {
+              this.shuffledTrainIndex =
+                  (this.shuffledTrainIndex + 1) % this.trainIndices.length;
+              return this.trainIndices[this.shuffledTrainIndex];
+            });
+      }
+    
+    nextTestBatch(batchSize) {
+        return this.nextBatch(batchSize, [this.testImages, this.testLabels], () => {
+            this.shuffledTestIndex =
+                (this.shuffledTestIndex + 1) % this.testIndices.length;
+            return this.testIndices[this.shuffledTestIndex];
+        });
+    }
+
+    nextBatch(batchSize, data, index) {
+        const batchImagesArray = new Float32Array(batchSize * this.image_size);
+        const batchLabelsArray = new Uint8Array(batchSize * this.num_classes);
+
+        for (let i = 0; i < batchSize; i++) {
+            const idx = index();
+
+            const image =
+                data[0].slice(idx * this.image_size, idx * this.image_size + this.image_size);
+            batchImagesArray.set(image, i * this.image_size);
+
+            const label =
+                data[1].slice(idx * this.num_classes, idx * this.num_classes + this.num_classes);
+            batchLabelsArray.set(label, i * this.num_classes);
+        }
+
+        const xs = tf.tensor2d(batchImagesArray, [batchSize, this.image_size]);
+        const labels = tf.tensor2d(batchLabelsArray, [batchSize, this.num_classes]);
+
+        return {xs, labels};
+    }
+}
+
 export class MnistTask {
     constructor() {
         this.displayInformation = displayInformation
@@ -90,14 +139,23 @@ export class MnistTask {
 
         // Do feature preprocessing
         ytrain = this.labelsPreprocessing(labels)
-        const imageTensors = []
+
+        const imageSize = this.trainingInformation.IMAGE_H * this.trainingInformation.IMAGE_W * 3;
+        const datasetBytesBuffer =
+            new ArrayBuffer(imageUri.length * imageSize * 4);
 
         for (let i = 0; i < imageUri.length; ++i) {
-            const tensor = await this.imagePreprocessing(imageUri[i])
-            imageTensors.push(tensor)
+            let offset = i * imageSize * 4;
+            let length = imageSize;
+            const datasetBytesView = new Float32Array(
+                datasetBytesBuffer, offset, length);
+            const representation = await this.imagePreprocessing(imageUri[i])
+            datasetBytesView.set(representation)
         }
 
-        Xtrain = tf.concat(imageTensors, 0)
+        Xtrain = new Float32Array(datasetBytesBuffer);
+
+        Xtrain = tf.data.array(Xtrain)
 
         return { Xtrain: Xtrain, ytrain: ytrain }
     }
@@ -124,7 +182,7 @@ export class MnistTask {
             const normalized = img_tensor.sub(offset).div(offset);
 
             // Reshape to a single-element batch so we can pass it to predict.
-            const batched = normalized.reshape([1, this.trainingInformation.IMAGE_H, this.trainingInformation.IMAGE_W, 3]);
+            const batched = normalized.reshape([1, this.trainingInformation.IMAGE_H, this.trainingInformation.IMAGE_W, 3]).dataSync();
             return batched
         })
         tf.dispose(img_tensor)
@@ -133,12 +191,11 @@ export class MnistTask {
     }
 
     labelsPreprocessing(labels) {
-        const nbLabels = labels.length
         const labelsOneHotEncoded = []
         labels.forEach(label =>
-            labelsOneHotEncoded.push(this.oneHotEncode(label))
+            labelsOneHotEncoded.push(...this.oneHotEncode(label))
         )
-        return tf.tensor2d(labelsOneHotEncoded, [nbLabels, this.trainingInformation.LABEL_LIST.length])
+        return Uint8Array(labelsOneHotEncoded)
     }
 
     oneHotEncode(label) {
@@ -260,4 +317,5 @@ export const trainingInformation = {
     IMAGE_H: 28,
     IMAGE_W: 28,
     LABEL_LIST: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+    fitDataset: true
 }
