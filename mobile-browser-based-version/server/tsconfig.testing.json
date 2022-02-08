@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "CommonJS",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "moduleResolution": "node",
+      "outDir": "./dist",
+      "baseUrl": ".",
+      "types": ["@types/mocha", "mocha", "chai", "node"],
+      "typeRoots": [
+        "./node_modules/@types"
+      ]
+    },
+    "include": ["src/**/*", "tests/**/*"],
+    "exclude": ["./node_modules/", "./models/", "./tasks/", "./dist/"],
+    
+}

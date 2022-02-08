@@ -1,11 +1,13 @@
 {
     "env": {
         "browser": true,
-        "es6": true
+        "es6": true,
+        "mocha": true
     },
     "extends": [
         "plugin:vue/essential",
-        "standard"
+        "standard",
+        "plugin:mocha/recommended"
     ],
     "globals": {
         "Atomics": "readonly",
@@ -18,7 +20,8 @@
     },
     "plugins": [
         "vue",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "mocha"
     ],
     "overrides": [
         {
