@@ -1,0 +1,16 @@
+Have failed so far to get jest to work with api.ts, related to esm import issues.
+
+Currently trying to get test_feai_requests.ts to work:
+
+npx ts-node --project tsconfig.test.json src/test/test_feai_requests.ts
+
+This gives Error [ERR_REQUIRE_ESM]: require() of ES Module...
+
+However:
+
+npx ts-node --project tsconfig.test.json src/run_server.ts
+
+seems to work perfectly, both are using the same config...
+
+Maybe the issue stems from package.json?
+
