@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "nodemon src/run_server.ts",
     "start": "NODE_PATH=./dist node dist/run_server.js",
-    "build": "tsc -p .",
+    "build": "tsc -p tsconfig.prod.json",
     "clean": "tsc --build --clean && rm -r dist || true",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "author": "",
   "license": "ISC",
@@ -40,8 +40,20 @@
     "delay": 2500
   },
   "devDependencies": {
+    "@babel/core": "^7.17.2",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-typescript": "^7.16.7",
+    "@types/jest": "^27.4.0",
+    "babel-jest": "^27.5.1",
     "jest": "^27.5.1",
     "nodemon": "^2.0.15",
+    "supertest": "^6.2.2",
     "ts-node": "^10.5.0"
+  },
+  "jest": {
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "testEnvironment": "node"
   }
 }

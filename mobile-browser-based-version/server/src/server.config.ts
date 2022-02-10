@@ -1,4 +1,9 @@
 import path from 'path'
+/**
+ * __filename is located in src/, we go back ../ to the root dit with
+ * join ..
+ */
+import { fileURLToPath } from 'url'
 
 /**
  * File containing all server-wide constants, e.g. absolute paths
@@ -9,10 +14,8 @@ import path from 'path'
  * File system saving scheme (URL-like).
  */
 export const SAVING_SCHEME = 'file://'
-/**
- * __filename is located in src/, we go back ../ to the root dit with
- * join ..
- */
+
+const __filename = fileURLToPath(import.meta.url)
 const filename = path.join(__filename, '..')
 /**
  * Root directory of the server app.

@@ -1,9 +1,0 @@
-{
-    "compilerOptions": {
-      "target": "es6",
-      "module": "CommonJS",
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "moduleResolution": "node"
-    }
-  }
